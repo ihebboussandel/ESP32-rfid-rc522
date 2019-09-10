@@ -1,4 +1,4 @@
-const char MAIN_page[] PROGMEM = R"=====(
+const char LOGIN_page[] PROGMEM = R"=====(
 <!DOCTYPE html>
 <html>
 <style>
@@ -17,8 +17,11 @@ const char MAIN_page[] PROGMEM = R"=====(
  
 <div class="card">
   <h1>Smart Stock</h1><br>
+  <input type="checkbox" id="check_all_1" name="check_all_1" title="add articles" />
+  <label for="check_all_1">add articles</label>
   <h1>==>:<span id="RFIDid">0</span></h1><br>
 </div>
+
 <script>
  
 setInterval(function() {
@@ -36,6 +39,10 @@ function getData() {
   };
   xhttp.open("GET", "readrfid", true);
   xhttp.send();
+}
+
+document.getElementById("check_all_1").onclick = function() {
+    document.location.href="logged?action=1"
 }
 </script>
 </body>

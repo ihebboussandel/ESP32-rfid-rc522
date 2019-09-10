@@ -8,17 +8,18 @@
 
 #include "Pin_config.h"
 #include "index.h"  //Web page header file
- 
+#include "loggedin.h"
 
 
+//String enter;
 int freq = 2000;
 int channel = 0;
 int resolution = 8;
 
 //wifi data
 
-const char* ssid = "Plume H1";
-const char* password =  "aminabia";
+const char* ssid= "Faty";
+const char* password =  "38057b7d";
 
 //used in authentication
 MFRC522::MIFARE_Key key;
@@ -30,19 +31,28 @@ MFRC522 mfrc522(SS_PIN, RST_PIN);
 WebServer server(80);
 
 String card_status;
-
+String auth = "no";
 void handleRoot() {
  String s = MAIN_page; //Read HTML contents
  server.send(200, "text/html", s); //Send web page
 }
- 
+ //void handleLogin() {
+// String s = LOGIN_page; //Read HTML contents
+// server.send(200, "text/html", s); //Send web page
+//}
+ void handleLoginactionadd() {
+  if (auth=="yes"){
+    
+ }
+ }
+
 void handleRFID() {
  int a = analogRead(A0);
  String adcValue = String(a);
  
  server.send(200, "text/plane", card_status); //Send cardstatus value only to client ajax request
 }
- 
+
 
 
 void setup() 
@@ -77,6 +87,8 @@ WiFi.begin(ssid, password);
  
   server.on("/", handleRoot);      //This is display page
   server.on("/readrfid", handleRFID);//To get update of rfid Value only
+// server.on("/logged", handleLogin);//To get logged page
+ // server.on("/logged?action=1", handleLoginactionadd);//To get logged page
  
   server.begin();                  //Start server
   Serial.println("HTTP server started");
@@ -102,7 +114,7 @@ void loop() {
     // Dump debug info about the card; PICC_HaltA() is automatically called
 //  mfrc522.PICC_DumpToSerial(&(mfrc522.uid));</p><p>  //call menu function and retrieve the desired option
   int op = 0;
-  readingData();
+    readingData();
   /*menu();
 
   if(op == 0) 
@@ -137,7 +149,7 @@ void readingData()
   alert_bip();
   httprequest_toserver(strID);
 Serial.println(strID);
-card_status=strID;
+//card_status=strID;
   //prepare the key - all keys are set to FFFFFFFFFFFFh
   for (byte i = 0; i < 6; i++) key.keyByte[i] = 0xFF;
   
@@ -215,15 +227,24 @@ void httprequest_toserver(String id){
  
    HTTPClient http;   
  
-   http.begin("http://192.168.43.135:8080/submit.php");  //Specify destination for HTTP request
+   http.begin("http://"+HOST_NAME+":8080/submit.php");  //Specify destination for HTTP request
    http.addHeader("Content-Type", "application/x-www-form-urlencoded");             //Specify content-type header
+ //String rfid="number="+id+"&auth="+auth;
  String rfid="number="+id+"&submit=enter";
    int httpResponseCode = http.POST(rfid);   //Send the actual POST request
  
    if(httpResponseCode>0){
  
     String response = http.getString();                       //Get the response to the request
- 
+   card_status=response;
+   if(response.indexOf("welcome")>= 0){
+    auth="yes";
+     Serial.println(auth);
+   }else if(response.indexOf("goodbye ")>= 0){
+    auth="no";
+    Serial.println(auth);
+    
+   }
     Serial.println(httpResponseCode);   //Print return code
     Serial.println(response);           //Print request answer
  
@@ -242,4 +263,3 @@ void httprequest_toserver(String id){
  
  }
 }
-
